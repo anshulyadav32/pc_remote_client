@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -17,6 +18,7 @@ class WebSocketService {
   Stream<bool> get connectionStream => _connectionController.stream;
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   bool get isConnected => _isConnected;
+  String? get lastServerUrl => _lastServerUrl;
 
   Uri _parseServerUri(String serverUrl) {
     final uri = Uri.parse(serverUrl.startsWith('http') ? serverUrl : 'http://$serverUrl');
@@ -58,22 +60,22 @@ class WebSocketService {
             final message = jsonDecode(data.toString()) as Map<String, dynamic>;
             _messageController.add(message);
           } catch (e) {
-            print('Error parsing message: $e');
+            debugPrint('Error parsing message: $e');
           }
         },
         onError: (error) {
-          print('WebSocket error: $error');
+          debugPrint('WebSocket error: $error');
           _handleDisconnection();
         },
         onDone: () {
-          print('WebSocket connection closed');
+          debugPrint('WebSocket connection closed');
           _handleDisconnection();
         },
       );
 
       return true;
     } catch (e) {
-      print('Connection error: $e');
+      debugPrint('Connection error: $e');
       _handleDisconnection();
       return false;
     }
@@ -101,10 +103,10 @@ class WebSocketService {
       try {
         _channel!.sink.add(jsonEncode(command));
       } catch (e) {
-        print('Error sending command: $e');
+        debugPrint('Error sending command: $e');
       }
     } else {
-      print('Not connected to server');
+      debugPrint('Not connected to server');
     }
   }
 

@@ -28,5 +28,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PCRemote needs camera access.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>PCRemote needs Bluetooth access to connect to nearby devices.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>PCRemote needs local network access to connect to devices on your network.</string>
 </dict>
 </plist>

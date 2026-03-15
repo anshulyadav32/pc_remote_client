@@ -4,7 +4,7 @@ import '../services/websocket_service.dart';
 class MediaControlPanel extends StatelessWidget {
   final WebSocketService wsService;
 
-  const MediaControlPanel({Key? key, required this.wsService}) : super(key: key);
+  const MediaControlPanel({super.key, required this.wsService});
 
   void _sendCommand(Map<String, dynamic> command) {
     wsService.sendCommand(command);

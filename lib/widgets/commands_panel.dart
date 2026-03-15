@@ -4,7 +4,7 @@ import '../services/websocket_service.dart';
 class CommandsPanel extends StatelessWidget {
   final WebSocketService wsService;
 
-  const CommandsPanel({Key? key, required this.wsService}) : super(key: key);
+  const CommandsPanel({super.key, required this.wsService});
 
   void _runCommand(String action, String label) {
     wsService.sendCommand({

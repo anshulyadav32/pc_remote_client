@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final AudioPlayer _audioPlayer = AudioPlayer();
   final Battery _battery = Battery();
   Timer? _batteryTimer;
+  final List<String> _connectedDevices = <String>[];
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             }
           });
         } catch (e) {
-          print('Battery sync error: $e');
+          debugPrint('Battery sync error: $e');
         }
       }
     });
@@ -85,18 +86,119 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         }
       });
     } catch (e) {
-      print('Notification listener error: $e');
+      debugPrint('Notification listener error: $e');
     }
   }
 
   void _initMessageListener() {
     _wsService.messageStream.listen((message) async {
+      final type = message['type'];
+      if (type == 'devices' || type == 'device_list' || type == 'clients' || type == 'peers') {
+        final data = message['data'];
+        if (data is List) {
+          if (!mounted) return;
+          setState(() {
+            _connectedDevices
+              ..clear()
+              ..addAll(data.map((e) => e.toString()));
+          });
+        }
+      }
+
       if (message['type'] == 'find_device' || (message['type'] == 'input' && message['action'] == 'ring')) {
         _showRingDialog();
       } else if (message['type'] == 'file' && message['action'] == 'receive') {
         _receiveFile(message['data']);
       }
     });
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: SafeArea(
+        child: StreamBuilder<bool>(
+          stream: _wsService.connectionStream,
+          initialData: _wsService.isConnected,
+          builder: (context, snapshot) {
+            final isConnected = snapshot.data ?? false;
+            final server = _wsService.lastServerUrl;
+
+            final devices = <String>[
+              if (isConnected && server != null) server,
+              ..._connectedDevices.where((d) => d != server),
+            ];
+
+            return ListView(
+              children: [
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  title: const Text('Profile'),
+                  subtitle: Text(isConnected ? 'Online' : 'Offline'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      Chip(
+                        avatar: const Icon(Icons.wifi, size: 18),
+                        label: Text(isConnected ? 'WiFi' : 'WiFi off'),
+                      ),
+                      const Chip(
+                        avatar: Icon(Icons.bluetooth, size: 18),
+                        label: Text('Bluetooth'),
+                      ),
+                      Chip(
+                        avatar: const Icon(Icons.public, size: 18),
+                        label: Text(isConnected ? 'Internet' : 'No internet'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const ListTile(
+                  leading: Icon(Icons.devices),
+                  title: Text('Devices connected'),
+                ),
+                if (devices.isEmpty)
+                  const ListTile(
+                    title: Text('No devices'),
+                  )
+                else
+                  ...devices.map(
+                    (d) => ListTile(
+                      leading: const Icon(Icons.computer),
+                      title: Text(d),
+                    ),
+                  ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.refresh),
+                  title: const Text('Reconnect'),
+                  enabled: _wsService.lastServerUrl != null,
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _wsService.reconnect();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.link_off),
+                  title: const Text('Disconnect'),
+                  enabled: isConnected,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _wsService.disconnect();
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 
   void _receiveFile(Map<String, dynamic> data) async {
@@ -124,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
       );
     } catch (e) {
-      print('Error receiving file: $e');
+      debugPrint('Error receiving file: $e');
     }
   }
 
@@ -133,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       try {
         await _audioPlayer.play(AssetSource('ring.mp3'));
       } catch (e) {
-        print('Error playing ring sound: $e');
+        debugPrint('Error playing ring sound: $e');
       }
     }
 
@@ -170,6 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildDrawer(),
       appBar: AppBar(
         title: const Text('PCRemote'),
         elevation: 2,

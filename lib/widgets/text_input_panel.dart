@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../services/websocket_service.dart';
 
 class TextInputPanel extends StatefulWidget {
   final WebSocketService wsService;
 
-  const TextInputPanel({Key? key, required this.wsService}) : super(key: key);
+  const TextInputPanel({super.key, required this.wsService});
 
   @override
   State<TextInputPanel> createState() => _TextInputPanelState();

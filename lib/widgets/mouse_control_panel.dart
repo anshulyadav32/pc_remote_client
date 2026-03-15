@@ -5,7 +5,7 @@ import '../services/websocket_service.dart';
 class MouseControlPanel extends StatefulWidget {
   final WebSocketService wsService;
 
-  const MouseControlPanel({Key? key, required this.wsService}) : super(key: key);
+  const MouseControlPanel({super.key, required this.wsService});
 
   @override
   State<MouseControlPanel> createState() => _MouseControlPanelState();
@@ -74,7 +74,7 @@ class _MouseControlPanelState extends State<MouseControlPanel> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Theme.of(context).colorScheme.surfaceVariant,
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                     Theme.of(context).colorScheme.surface,
                   ],
                 ),
@@ -125,7 +125,7 @@ class _MouseControlPanelState extends State<MouseControlPanel> {
                           Icon(
                             Icons.touch_app,
                             size: 64,
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
