@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:clipboard_listener/clipboard_listener.dart';
 import '../services/websocket_service.dart';
 
 class ClipboardPanel extends StatefulWidget {
@@ -15,6 +16,7 @@ class _ClipboardPanelState extends State<ClipboardPanel> {
   final _clipboardController = TextEditingController();
   final _remoteClipboardController = TextEditingController();
   bool _autoClipboardEnabled = false;
+  bool _isInternalChange = false;
 
   @override
   void initState() {
@@ -22,10 +24,36 @@ class _ClipboardPanelState extends State<ClipboardPanel> {
 
     // Listen for clipboard messages from server
     widget.wsService.messageStream.listen((message) {
-      if (message['type'] == 'clipboard_content') {
+      if (message['type'] == 'clipboard' && message['action'] == 'sync') {
+        final text = message['data']['text'];
         setState(() {
-          _remoteClipboardController.text = message['content'] ?? '';
+          _remoteClipboardController.text = text ?? '';
         });
+        
+        if (_autoClipboardEnabled) {
+          _isInternalChange = true;
+          Clipboard.setData(ClipboardData(text: text));
+          _showMessage('Clipboard synced from PC');
+        }
+      }
+    });
+
+    // Listen for local clipboard changes
+    ClipboardListener.addListener(() async {
+      if (_isInternalChange) {
+        _isInternalChange = false;
+        return;
+      }
+
+      if (_autoClipboardEnabled) {
+        final data = await Clipboard.getData(Clipboard.kTextPlain);
+        if (data?.text != null && data!.text!.isNotEmpty) {
+          widget.wsService.sendCommand({
+            'type': 'clipboard',
+            'action': 'sync',
+            'data': {'text': data.text}
+          });
+        }
       }
     });
   }
@@ -40,20 +68,25 @@ class _ClipboardPanelState extends State<ClipboardPanel> {
   void _setRemoteClipboard() {
     if (_clipboardController.text.isNotEmpty) {
       widget.wsService.sendCommand({
-        'type': 'set_clipboard',
-        'text': _clipboardController.text,
+        'type': 'clipboard',
+        'action': 'sync',
+        'data': {'text': _clipboardController.text}
       });
       _showMessage('Clipboard set on remote computer!');
     }
   }
 
   void _getRemoteClipboard() {
-    widget.wsService.sendCommand({'type': 'get_clipboard'});
+    widget.wsService.sendCommand({
+      'type': 'clipboard',
+      'action': 'get'
+    });
     _showMessage('Requesting remote clipboard...');
   }
 
   void _copyToLocal() {
     if (_remoteClipboardController.text.isNotEmpty) {
+      _isInternalChange = true;
       Clipboard.setData(ClipboardData(text: _remoteClipboardController.text));
       _showMessage('Copied to local clipboard!');
     }
@@ -63,14 +96,7 @@ class _ClipboardPanelState extends State<ClipboardPanel> {
     setState(() {
       _autoClipboardEnabled = !_autoClipboardEnabled;
     });
-
-    if (_autoClipboardEnabled) {
-      widget.wsService.sendCommand({'type': 'enable_auto_clipboard'});
-      _showMessage('Auto clipboard enabled');
-    } else {
-      widget.wsService.sendCommand({'type': 'disable_auto_clipboard'});
-      _showMessage('Auto clipboard disabled');
-    }
+    _showMessage('Auto sync ${_autoClipboardEnabled ? 'enabled' : 'disabled'}');
   }
 
   void _showMessage(String message) {

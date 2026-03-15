@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../services/websocket_service.dart';
 
 class ConnectionPanel extends StatefulWidget {
   final WebSocketService wsService;
 
-  const ConnectionPanel({Key? key, required this.wsService}) : super(key: key);
+  const ConnectionPanel({super.key, required this.wsService});
 
   @override
   State<ConnectionPanel> createState() => _ConnectionPanelState();
@@ -91,9 +90,9 @@ class _ConnectionPanelState extends State<ConnectionPanel> {
                     isConnected ? 'Connected to Remote Server' : 'Not Connected',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isConnected ? Colors.green : Colors.grey,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: isConnected ? Colors.green : Colors.grey,
+                        ),
                   ),
                   const SizedBox(height: 40),
                   Card(
@@ -106,8 +105,8 @@ class _ConnectionPanelState extends State<ConnectionPanel> {
                           Text(
                             'Connection Settings',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           const SizedBox(height: 24),
                           TextField(
@@ -182,8 +181,8 @@ class _ConnectionPanelState extends State<ConnectionPanel> {
                               Text(
                                 'How to Connect',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ],
                           ),

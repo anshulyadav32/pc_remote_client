@@ -11,6 +11,16 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   web_socket_channel: ^3.0.3
+  permission_handler: ^12.0.1
+  flutter_blue_plus: ^2.2.1
+  flutter_ble_peripheral: ^2.1.0
+  nearby_connections: ^4.3.0
+  clipboard_listener: ^2.0.0
+  audioplayers: ^6.6.0
+  notification_listener_service: ^0.3.5
+  file_picker: ^10.3.10
+  path_provider: ^2.1.5
+  battery_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:
