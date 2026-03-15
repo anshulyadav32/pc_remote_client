@@ -12,7 +12,7 @@ class ConnectionPanel extends StatefulWidget {
 }
 
 class _ConnectionPanelState extends State<ConnectionPanel> {
-  final _serverController = TextEditingController(text: '192.168.1.100:8765');
+  final _serverController = TextEditingController(text: 'pcremote.r-u.live');
   final _tokenController = TextEditingController(text: 'CHANGE_ME_1234');
   bool _isConnecting = false;
 

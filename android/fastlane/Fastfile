@@ -1,0 +1,16 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and upload the App Bundle to Google Play Store"
+  lane :deploy do
+    # Build the app bundle using Flutter
+    sh("cd ../.. && flutter build appbundle --release --android-skip-build-dependency-validation")
+
+    # Upload to Google Play (Internal track by default)
+    upload_to_play_store(
+      track: 'internal',
+      version_name: '1.0.0',
+      aab: '../build/app/outputs/bundle/release/app-release.aab'
+    )
+  end
+end

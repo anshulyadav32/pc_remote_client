@@ -7,12 +7,12 @@ void main() async {
 }
 
 class PCRemoteApp extends StatelessWidget {
-  const PCRemoteApp({Key? key}) : super(key: key);
+  const PCRemoteApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PC Remote Control',
+      title: 'PCRemote',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,

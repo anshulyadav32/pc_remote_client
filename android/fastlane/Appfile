@@ -1,0 +1,2 @@
+json_key_file("api-key.json") # Path to your service account JSON key
+package_name("com.remote.pc_remote_client") # Your app's package name

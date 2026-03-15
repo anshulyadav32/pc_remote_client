@@ -295,15 +295,33 @@ buildTypes {
 flutter build apk --release
 ```
 
-## Privacy Policy
+## Privacy Policy & Disclosures
 
-This app:
-- Does NOT collect any personal data
-- Does NOT send data to external servers
-- Only connects to the IP address you specify
-- Does NOT track usage or analytics
-- Does NOT contain ads
-- All communication stays on your local network
+### 1. Privacy Policy
+PC Remote is committed to protecting your privacy. We do not collect, store, or transmit any personal data from your device to our servers or any third-party services. All communication occurs directly between your mobile device and your personal computer via your local network.
+
+### 2. App Access
+The App requires access to your local network and a connection token for authentication between the client and server. No account creation or external login is required.
+
+### 3. Advertising
+The App is 100% ad-free. We do not display any third-party advertisements or promotional content.
+
+### 4. Content Rating
+The App is suitable for everyone. It does not contain any mature content or violence.
+
+### 5. Target Audience
+The App is intended for users aged 13 and older.
+
+### 6. Data Safety
+- **No Data Shared**: We do not share any data with third parties.
+- **No Data Collected**: We do not collect any personal or usage data.
+- **Encrypted Transmission**: All data (keystrokes, mouse, clipboard) is encrypted and stays within your private network.
+
+### 7. Other Disclosures
+- **Government Apps**: Not a government app.
+- **Financial Features**: No financial or banking features.
+- **Health Features**: No health-related features or medical advice.
+- **App Organization**: Categorized as a Productivity tool.
 
 ## Contributing
 

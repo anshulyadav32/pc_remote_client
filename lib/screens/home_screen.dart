@@ -9,7 +9,7 @@ import '../widgets/text_input_panel.dart';
 import '../widgets/clipboard_panel.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PC Remote Control'),
+        title: const Text('PCRemote'),
         elevation: 2,
         actions: [
           StreamBuilder<bool>(

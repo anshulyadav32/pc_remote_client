@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+import 'package:web_socket_channel/status.dart' as status;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService {
-  WebSocket? _socket;
+  WebSocketChannel? _channel;
+  StreamSubscription<dynamic>? _subscription;
   final StreamController<bool> _connectionController = StreamController<bool>.broadcast();
   final StreamController<Map<String, dynamic>> _messageController = StreamController<Map<String, dynamic>>.broadcast();
 
@@ -15,6 +18,14 @@ class WebSocketService {
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   bool get isConnected => _isConnected;
 
+  Uri _parseServerUri(String serverUrl) {
+    final uri = Uri.parse(serverUrl.startsWith('http') ? serverUrl : 'http://$serverUrl');
+    if (uri.host.isEmpty) {
+      throw FormatException('Invalid server url: $serverUrl');
+    }
+    return uri;
+  }
+
   Future<bool> connect(String serverUrl, String token) async {
     try {
       // Disconnect if already connected
@@ -23,10 +34,17 @@ class WebSocketService {
       }
 
       // Parse server URL and construct WebSocket URL
-      final uri = Uri.parse(serverUrl.startsWith('http') ? serverUrl : 'http://$serverUrl');
-      final wsUrl = 'ws://${uri.host}:${uri.port}/ws?token=$token';
+      final uri = _parseServerUri(serverUrl);
+      final wsScheme = uri.scheme == 'https' ? 'wss' : 'ws';
+      final wsUri = Uri(
+        scheme: wsScheme,
+        host: uri.host,
+        port: uri.port,
+        path: '/ws',
+        queryParameters: {'token': token},
+      );
 
-      _socket = await WebSocket.connect(wsUrl);
+      _channel = WebSocketChannel.connect(wsUri);
       _isConnected = true;
       _lastServerUrl = serverUrl;
       _lastToken = token;
@@ -34,10 +52,10 @@ class WebSocketService {
       _connectionController.add(true);
 
       // Listen for messages
-      _socket!.listen(
+      _subscription = _channel!.stream.listen(
         (data) {
           try {
-            final message = jsonDecode(data as String) as Map<String, dynamic>;
+            final message = jsonDecode(data.toString()) as Map<String, dynamic>;
             _messageController.add(message);
           } catch (e) {
             print('Error parsing message: $e');
@@ -63,22 +81,25 @@ class WebSocketService {
 
   void _handleDisconnection() {
     _isConnected = false;
-    _socket = null;
+    _channel = null;
     _connectionController.add(false);
   }
 
   Future<void> disconnect() async {
-    if (_socket != null) {
-      await _socket!.close();
-      _socket = null;
-    }
+    await _subscription?.cancel();
+    _subscription = null;
+
+    final channel = _channel;
+    _channel = null;
+    channel?.sink.close(status.normalClosure);
+
     _handleDisconnection();
   }
 
   void sendCommand(Map<String, dynamic> command) {
-    if (_socket != null && _isConnected) {
+    if (_channel != null && _isConnected) {
       try {
-        _socket!.add(jsonEncode(command));
+        _channel!.sink.add(jsonEncode(command));
       } catch (e) {
         print('Error sending command: $e');
       }
